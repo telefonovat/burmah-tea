@@ -4,6 +4,7 @@ import yesterdayData from "./data/digest.yesterday.json";
 import type { Story, View } from "./types";
 import StoryCard from "./components/StoryCard";
 import ViewSwitcher from "./components/ViewSwitcher";
+import SiteHeader from "./components/SiteHeader";
 
 const digests: Record<View, Story[]> = {
   today: todayData as Story[],
@@ -21,14 +22,7 @@ export default function App() {
 
   return (
     <>
-      <header>
-        <div className="container">
-          <h1>
-            Burmahtea<span className="dot">.</span>com
-          </h1>
-          <p className="tagline">မြန်မာ ဖေ့စ်ဘွတ်ခ်မှ နောက်ဆုံး သတင်းများ</p>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="container">
         <ViewSwitcher view={view} onSelect={setView} />
