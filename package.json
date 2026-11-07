@@ -1,0 +1,9 @@
+{
+  "name": "n726-burmah-tea",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --dir frontend dev",
+    "build": "pnpm --dir frontend build",
+    "preview": "pnpm --dir frontend preview"
+  }
+}

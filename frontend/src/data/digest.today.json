@@ -1,0 +1,29 @@
+[
+  {
+    "title": "တပ်မတော်၏ လက်နက်ချက်သွင်းမှု အဆုံးသတ်ရန် အမေရိကန် အစိုးရ အဆိုပြုချက်",
+    "summary": "အမေရိကန်အစိုးရက မြန်မာ့တပ်မတော်၏ လက်နက်ချက်သွင်းမှုကို အဆုံးသတ်ရန် အဆိုပြုချက်တင်သွင်းလိုက်သည်။",
+    "url": "https://www.facebook.com/example1",
+    "page_name": "BBC News Burmese",
+    "page_url": "https://www.facebook.com/bbcburmese",
+    "engagement": 4200,
+    "tag": "[reported]"
+  },
+  {
+    "title": "ရန်ကုန်မြို့တော် စည်ပင်သာယာတွင် အလွန်ကြီးမားသော အစည်းအဝေးတစ်ခု ကျင်းပ",
+    "summary": "နေပြည်တော်တွင် နိုင်ငံရေးအစည်းအဝေးကြီးတစ်ခုကို ကျင်းပခဲ့ပြီး အစည်းအဝေးသို့ အလွန်များပြားသော လူအပေါင်းစုံတက်ရောက်ခဲ့သည်။",
+    "url": "https://www.facebook.com/example2",
+    "page_name": "Myanmar Now",
+    "page_url": "https://www.facebook.com/myanmarnownews",
+    "engagement": 8500,
+    "tag": "[reported]"
+  },
+  {
+    "title": "ပင်လုံညီလာခံ အဆုံးသတ်",
+    "summary": "မြန်မာနိုင်ငံ၏ အဓိက နိုင်ငံရေးပါတီများ ပင်လုံညီလာခံကို အဆုံးသတ်၍ အစည်းအဝေးတစ်ခုကို ကျင်းပခဲ့သည်။",
+    "url": "https://www.facebook.com/example3",
+    "page_name": "The Irrawaddy",
+    "page_url": "https://www.facebook.com/irrawaddyburmese",
+    "engagement": 6300,
+    "tag": "[confirmed]"
+  }
+]

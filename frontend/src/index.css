@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #faf7f2;
+  --header-bg: #1e4d3b;
+  --header-text: #fff;
+  --text: #222;
+  --muted: #777;
+  --border: #e5ddd0;
+  --accent: #c47f17;
+  --accent-dark: #96620e;
+  --card-bg: #fff;
+  --badge-reported-bg: #fff3e0;
+  --badge-reported-text: #a05a00;
+  --badge-confirmed-bg: #e6f4ea;
+  --badge-confirmed-text: #1e6b3a;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111512;
+    --header-bg: #14312a;
+    --header-text: #eee;
+    --text: #e8e4dc;
+    --muted: #9a958c;
+    --border: #2a2f2b;
+    --accent: #e0a44c;
+    --accent-dark: #f0b45e;
+    --card-bg: #1a201c;
+    --badge-reported-bg: #3a2c14;
+    --badge-reported-text: #e5b577;
+    --badge-confirmed-bg: #14301e;
+    --badge-confirmed-text: #8fd0a5;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body {
+  font-family: "Noto Sans Myanmar", system-ui, -apple-system, sans-serif;
+  line-height: 1.8;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Header */
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 2rem 0 1.5rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+header .dot {
+  color: var(--accent);
+}
+
+header .tagline {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+/* View switcher */
+.view-switch {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+.view-switch button {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--card-bg);
+  transition: all 0.15s ease;
+}
+
+.view-switch button:hover {
+  color: var(--text);
+}
+
+.view-switch button.active {
+  background: var(--header-bg);
+  color: var(--header-text);
+  border-color: var(--header-bg);
+}
+
+/* Meta */
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.meta .date {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Story cards */
+article.story-card {
+  margin-bottom: 1.25rem;
+  padding: 1.4rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+article.story-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.story-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.story-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.story-header h2 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.story-header h2 a:hover {
+  color: var(--accent-dark);
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.badge-reported {
+  background: var(--badge-reported-bg);
+  color: var(--badge-reported-text);
+}
+
+.badge-confirmed {
+  background: var(--badge-confirmed-bg);
+  color: var(--badge-confirmed-text);
+}
+
+.engagement {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+
+.engagement-count {
+  background: var(--bg);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+}
+
+.summary {
+  margin: 0 0 0.9rem;
+}
+
+.source {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.source a {
+  color: var(--accent-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.source a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+footer {
+  margin-top: 3rem;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  article.story-card {
+    padding: 1rem;
+  }
+
+  .story-header {
+    flex-direction: column;
+  }
+}
