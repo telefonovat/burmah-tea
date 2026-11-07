@@ -1,22 +1,12 @@
 [project]
 name = "n726-burmah-tea"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-authors = [
-    { name = "Phone", email = "phone.khant.lu@sap.com" }
-]
-requires-python = ">=3.9"
-dependencies = [
-    "jinja2>=3.1.6",
-]
+description = "Burmahtea.com – daily Burmese Facebook digest with chat agent"
+requires-python = ">=3.13"
 
-[project.scripts]
-n726-burmah-tea = "n726_burmah_tea:main"
-
-[build-system]
-requires = ["uv_build>=0.13.7,<0.14.0"]
-build-backend = "uv_build"
+# Workspace root only: no Python package lives here (frontend is JS, backend is a member).
+[tool.uv]
+package = false
 
 [tool.uv.workspace]
 members = [
