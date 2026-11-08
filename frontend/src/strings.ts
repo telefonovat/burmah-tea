@@ -80,3 +80,13 @@ export const TIER_LABEL: Record<string, Str> = {
   tabloid: { mm: "တက်ဘွိုက်", en: "tabloid" },
   celebrity: { mm: "ပုဂ္ဂလိက", en: "personal" },
 };
+
+const MM_DIGITS = "၀၁၂၃၄၅၆၇၈၉";
+
+/** Local digits: Burmese numerals in Burmese mode, Latin otherwise. */
+export function num(n: number | string, lang: Lang): string {
+  const s = String(n);
+  return lang === "mm" ? s.replace(/[0-9]/g, (d) => MM_DIGITS[Number(d)]) : s;
+}
+
+export const sectionCount: Str = { mm: "ပုဒ်", en: "shown" };

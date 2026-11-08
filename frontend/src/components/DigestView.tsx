@@ -1,9 +1,11 @@
+import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useDigest } from "../hooks/useDigest";
 import { dateLabel, strings } from "../strings";
 import type { Lang } from "../types";
 import CategorySection from "./CategorySection";
 import Skeleton from "./Skeleton";
+import { PixelNewspaper, PixelTeaGlass } from "./icons";
 
 export default function DigestView({ lang }: { lang: Lang }) {
   const state = useDigest();
@@ -31,14 +33,21 @@ export default function DigestView({ lang }: { lang: Lang }) {
     <main>
       <div className="meta">
         <span className="date">{dateLabel(digest.date, lang)}</span>
-        <button className="shuffle" onClick={() => setRoll((r) => r + 1)}>
-          {strings.shuffle[lang]}
+        <button
+          className="shuffle"
+          onClick={() => setRoll((r) => r + 1)}
+          aria-label={strings.shuffle[lang]}
+          title={strings.shuffle[lang]}
+        >
+          <RefreshCw size={15} aria-hidden="true" />
         </button>
       </div>
       {tea.length > 0 && (
         <CategorySection
           key={`tea-${roll}`}
           title={strings.sectionTea[lang]}
+          icon={<PixelTeaGlass className="section-icon" />}
+          variant="tea"
           stories={tea}
           lang={lang}
         />
@@ -47,6 +56,8 @@ export default function DigestView({ lang }: { lang: Lang }) {
         <CategorySection
           key={`news-${roll}`}
           title={strings.sectionNews[lang]}
+          icon={<PixelNewspaper className="section-icon" />}
+          variant="news"
           stories={news}
           lang={lang}
         />

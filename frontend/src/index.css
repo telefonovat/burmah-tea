@@ -73,6 +73,22 @@ header h1 {
   letter-spacing: -0.01em;
 }
 
+/* Wordmark with the pixel tea stain behind it */
+.wordmark {
+  position: relative;
+  display: inline-block;
+}
+
+.stain {
+  position: absolute;
+  top: -0.9rem;
+  right: -2.6rem;
+  width: 4.6rem;
+  height: 4.6rem;
+  opacity: 0.13;
+  pointer-events: none;
+}
+
 header .dot {
   color: var(--accent);
 }
@@ -117,6 +133,14 @@ header .dot {
   padding: 0.35rem 0;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tab-icon {
+  width: 15px;
+  height: 15px;
 }
 
 .tabs button:hover {
@@ -145,11 +169,11 @@ header .dot {
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
-  font-family: inherit;
-  font-size: 0.85rem;
   border-radius: 6px;
-  padding: 0.2rem 0.7rem;
+  padding: 0.3rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
 }
 
 .shuffle:hover {
@@ -157,15 +181,43 @@ header .dot {
   border-color: var(--border-strong);
 }
 
+.shuffle-icon {
+  width: 15px;
+  height: 15px;
+}
+
 .category {
   margin-top: 0.75rem;
 }
 
 .category-title {
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
   font-weight: 700;
+  color: var(--accent);
+  margin: 1.4rem 0 0.6rem;
+}
+
+.section-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.category-count {
   color: var(--muted);
-  margin: 1.25rem 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+/* Tea section cards carry a faint plum tint; news stays neutral */
+.section-tea .story-card {
+  border-color: #45303a;
+}
+
+.section-tea .story-card:hover {
+  border-color: #5d414e;
 }
 
 /* Story cards: flat, border-defined, no shadows */

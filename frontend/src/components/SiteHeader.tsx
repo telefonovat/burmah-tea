@@ -1,5 +1,6 @@
 import { strings } from "../strings";
 import type { Lang, Tab } from "../types";
+import { PixelStain, PixelTeaGlass } from "./icons";
 
 export default function SiteHeader({
   tab,
@@ -17,7 +18,8 @@ export default function SiteHeader({
       <div className="container">
         <div className="header-row">
           <div>
-            <h1>
+            <h1 className="wordmark">
+              <PixelStain className="stain" />
               Burmahtea<span className="dot">.</span>com
             </h1>
             <p className="tagline">{strings.tagline[lang]}</p>
@@ -41,6 +43,7 @@ export default function SiteHeader({
             className={tab === "chat" ? "active" : ""}
             onClick={() => onSelectTab("chat")}
           >
+            <PixelTeaGlass className="tab-icon" />
             {strings.tabChat[lang]}
           </button>
         </nav>

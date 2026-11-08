@@ -1,15 +1,20 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import type { Lang, Story } from "../types";
+import { num, sectionCount } from "../strings";
 import StoryCard from "./StoryCard";
 
 // 3 stories at random from the top 10 by engagement.
 // Re-rolls whenever the parent re-mounts the section (Shuffle button).
 export default function CategorySection({
   title,
+  icon,
+  variant,
   stories,
   lang,
 }: {
   title: string;
+  icon: ReactNode;
+  variant: "tea" | "news";
   stories: Story[];
   lang: Lang;
 }) {
@@ -24,8 +29,14 @@ export default function CategorySection({
   if (picked.length === 0) return null;
 
   return (
-    <section className="category">
-      <h2 className="category-title">{title}</h2>
+    <section className={`category section-${variant}`}>
+      <h2 className="category-title">
+        {icon}
+        <span>{title}</span>
+        <span className="category-count">
+          {num(picked.length, lang)} {sectionCount[lang]}
+        </span>
+      </h2>
       {picked.map((s) => (
         <StoryCard key={s.id} story={s} lang={lang} />
       ))}
