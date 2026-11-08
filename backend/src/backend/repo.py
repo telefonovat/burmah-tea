@@ -63,13 +63,29 @@ class PostRepo:
         self._conn.execute(_SCHEMA)
         self._conn.commit()
 
-    def upsert_posts(self, posts: list[Post]) -> None:
-        """Insert new posts, update engagement on refetch. first_seen never changes."""
+    def upsert_posts(self, posts: list[Post]) -> tuple[int, int]:
+        """Insert new posts, update engagement on refetch. first_seen never changes.
+
+        Returns (new, updated) counts by unique post id.
+        """
+        if not posts:
+            return 0, 0
+        ids = [p.post_id for p in posts]
+        existing: set[str] = set()
+        for i in range(0, len(ids), 500):
+            chunk = ids[i : i + 500]
+            rows = self._conn.execute(
+                f"SELECT post_id FROM posts WHERE post_id IN ({','.join('?' * len(chunk))})",
+                chunk,
+            )
+            existing.update(r[0] for r in rows)
         self._conn.executemany(
             _UPSERT,
             [tuple(p.model_dump()[c] for c in _COLUMNS) for p in posts],
         )
         self._conn.commit()
+        unique = set(ids)
+        return len(unique - existing), len(unique & existing)
 
     def get_posts_for_day(self, day: date) -> list[Post]:
         """All posts timestamped within the Myanmar-calendar day, top engagement first."""

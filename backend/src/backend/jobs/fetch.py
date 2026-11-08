@@ -9,14 +9,16 @@ Run: uv run --project backend python -m backend.jobs.fetch [--no-fetch]
 import argparse
 import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from apify_client import ApifyClient
 
 from backend.config import DATA_DIR, settings
 from backend.models import Post, Source
 from backend.repo import PostRepo
+from backend.runlog import run_logged
 from backend.sources import load_sources
-from backend.timeutil import MMT, now_mmt_iso
+from backend.timeutil import MMT, now_mmt_iso, today_mmt
 
 ACTOR_ID = "apify/facebook-posts-scraper"
 FIXTURE_FILE = DATA_DIR / "fixtures" / "raw-2026-11-08.json"
@@ -81,36 +83,54 @@ def main() -> None:
     parser.add_argument(
         "--no-fetch", action="store_true", help="read the saved raw fixture instead of Apify"
     )
+    parser.add_argument(
+        "--fixture", type=Path, default=FIXTURE_FILE, help="fixture path for --no-fetch"
+    )
     args = parser.parse_args()
 
-    sources = load_sources()
-    by_url = {s.url: s for s in sources}
-    now_iso = now_mmt_iso()
+    def run() -> dict[str, int]:
+        sources = load_sources()
+        by_url = {s.url: s for s in sources}
+        now_iso = now_mmt_iso()
 
-    if args.no_fetch:
-        raw = json.loads(FIXTURE_FILE.read_text(encoding="utf-8"))
-        print(f"Fixture: {len(raw)} raw items from {FIXTURE_FILE}")
-    else:
-        print(f"Fetching {len(sources)} sources from Apify...")
-        raw = fetch_raw(sources)
+        if args.no_fetch:
+            raw = json.loads(args.fixture.read_text(encoding="utf-8"))
+            print(f"Fixture: {len(raw)} raw items from {args.fixture}")
+        else:
+            print(f"Fetching {len(sources)} sources from Apify...")
+            raw = fetch_raw(sources)
+            # Raw snapshot: lets all later work re-run normalisation without Apify spend.
+            snapshot = DATA_DIR / "fixtures" / f"raw-{today_mmt().isoformat()}.json"
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_text(
+                json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+            print(f"Raw snapshot: {len(raw)} items -> {snapshot}")
 
-    posts: list[Post] = []
-    skipped_unmatched = 0
-    for item in raw:
-        # Every post inherits its source tier at fetch time.
-        source = by_url.get(item.get("inputUrl") or item.get("facebookUrl") or "")
-        if source is None:
-            skipped_unmatched += 1
-            continue
-        post = normalise(item, source, now_iso)
-        if post is not None:
-            posts.append(post)
+        posts: list[Post] = []
+        skipped_unmatched = 0
+        for item in raw:
+            # Every post inherits its source tier at fetch time.
+            source = by_url.get(item.get("inputUrl") or item.get("facebookUrl") or "")
+            if source is None:
+                skipped_unmatched += 1
+                continue
+            post = normalise(item, source, now_iso)
+            if post is not None:
+                posts.append(post)
 
-    repo = PostRepo(DB_FILE)
-    repo.upsert_posts(posts)
-    print(f"Upserted {len(posts)} posts -> {DB_FILE}")
-    if skipped_unmatched:
-        print(f"Skipped {skipped_unmatched} items with no matching source URL")
+        new, updated = PostRepo(DB_FILE).upsert_posts(posts)
+        print(f"Upserted {len(posts)} posts -> {DB_FILE} ({new} new, {updated} updated)")
+        if skipped_unmatched:
+            print(f"Skipped {skipped_unmatched} items with no matching source URL")
+        return {
+            "posts_fetched": len(raw),
+            "posts_new": new,
+            "posts_updated": updated,
+            "skipped_unmatched": skipped_unmatched,
+        }
+
+    run_logged("fetch", today_mmt().isoformat(), run)
 
 
 if __name__ == "__main__":

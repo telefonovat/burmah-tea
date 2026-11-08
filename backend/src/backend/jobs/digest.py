@@ -16,6 +16,7 @@ from openai import OpenAI
 from backend.config import DATA_DIR, settings
 from backend.models import Digest, Post, Story, StorySource
 from backend.repo import PostRepo
+from backend.runlog import run_logged
 from backend.timeutil import now_mmt_iso, today_mmt
 
 DB_FILE = DATA_DIR / "posts.db"
@@ -77,7 +78,8 @@ def build_stories(posts: list[Post], topics: list[dict]) -> list[Story]:
     by_id = {p.post_id: p for p in posts}
     stories: list[Story] = []
     for i, topic in enumerate(topics, start=1):
-        topic_posts = [by_id[pid] for pid in topic.get("post_ids", []) if pid in by_id]
+        # LLMs sometimes emit numeric ids as JSON numbers; coerce before matching.
+        topic_posts = [by_id[str(pid)] for pid in topic.get("post_ids", []) if str(pid) in by_id]
         if not topic_posts:
             continue
         sources: list[StorySource] = []
@@ -119,25 +121,34 @@ def main() -> None:
     args = parser.parse_args()
 
     day = date.fromisoformat(args.day) if args.day else today_mmt()
-    posts = PostRepo(DB_FILE).get_posts_for_day(day)
-    if not posts:
-        raise SystemExit(f"No posts for {day} in {DB_FILE}. Run the fetch job first.")
-    print(f"{len(posts)} posts for {day} -> clustering via {settings.llm_model}")
 
-    topics = call_llm(posts)
-    stories = build_stories(posts, topics)
-    print(f"{len(stories)} stories")
+    def run() -> dict[str, int]:
+        posts = PostRepo(DB_FILE).get_posts_for_day(day)
+        if not posts:
+            raise SystemExit(f"No posts for {day} in {DB_FILE}. Run the fetch job first.")
+        print(f"{len(posts)} posts for {day} -> clustering via {settings.llm_model}")
 
-    digest = Digest(
-        date=day.isoformat(),
-        generated_at=now_mmt_iso(),
-        stories=stories,
-    )
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.write_text(
-        digest.model_dump_json(indent=2) + "\n", encoding="utf-8"
-    )
-    print(f"Wrote {OUTPUT_FILE}")
+        topics = call_llm(posts)
+        stories = build_stories(posts, topics)
+        if not stories:
+            raise RuntimeError(
+                f"LLM returned {len(topics)} topics but none matched a known post id"
+            )
+        print(f"{len(stories)} stories")
+
+        digest = Digest(
+            date=day.isoformat(),
+            generated_at=now_mmt_iso(),
+            stories=stories,
+        )
+        OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT_FILE.write_text(
+            digest.model_dump_json(indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"Wrote {OUTPUT_FILE}")
+        return {"posts": len(posts), "topics": len(topics), "stories": len(stories)}
+
+    run_logged("digest", day.isoformat(), run)
 
 
 if __name__ == "__main__":

@@ -50,6 +50,20 @@ def test_upsert_updates_engagement_preserves_first_seen(tmp_path: Path) -> None:
     assert posts[0].last_updated == "2026-11-08T20:00:00+06:30"
 
 
+def test_upsert_counts_new_and_updated(tmp_path: Path) -> None:
+    repo = PostRepo(tmp_path / "test.db")
+    new, updated = repo.upsert_posts([make_post("1", 1760000000), make_post("2", 1760000001)])
+    assert (new, updated) == (2, 0)
+    new, updated = repo.upsert_posts([make_post("2", 1760000001), make_post("3", 1760000002)])
+    assert (new, updated) == (1, 1)
+    assert repo.count() == 3
+
+
+def test_upsert_empty_list_returns_zeroes(tmp_path: Path) -> None:
+    repo = PostRepo(tmp_path / "test.db")
+    assert repo.upsert_posts([]) == (0, 0)
+
+
 def test_get_posts_for_day_filters_window(tmp_path: Path) -> None:
     repo = PostRepo(tmp_path / "test.db")
     start, end = day_bounds(date(2026, 11, 8))
