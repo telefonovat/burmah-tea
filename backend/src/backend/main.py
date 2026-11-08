@@ -1,31 +1,13 @@
 """FastAPI backend: minimal chat endpoint over the today digest knowledge base."""
 
 import json
-from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Absolute so the env file loads no matter where uvicorn is started from.
-ENV_FILE = Path(__file__).parents[2] / ".env"
-# Single source of truth for pipeline output. Pipeline writes, backend serves, frontend fetches.
-DATA_DIR = Path(__file__).parents[3] / "data"
+from backend.config import DATA_DIR, settings
 
-
-class Settings(BaseSettings):
-    """LLM config, loaded from backend/.env."""
-
-    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
-
-    llm_api_key: str = ""
-    llm_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
-    llm_model: str = "gemini-3.8-flash"
-    apify_token: str = ""
-
-
-settings = Settings()
 app = FastAPI(title="burmahtea")
 
 
