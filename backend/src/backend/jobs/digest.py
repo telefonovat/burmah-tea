@@ -38,6 +38,8 @@ For each topic, respond with a JSON object:
 - "summary": 2-4 sentence Burmese summary. Attribute claims to sources with tier-appropriate \
 hedging, e.g. "according to X, a tabloid page" for unverified claims. Never state unverified \
 claims as confirmed fact.
+- "title_en": the same headline in English
+- "summary_en": the same summary in English, with the same attribution and hedging
 - "post_ids": the post ids belonging to this topic (every post belongs to at most one topic; \
 leave junk posts out entirely)
 - "tea": true if the topic is gossip, celebrity rumor, or entertainment speculation rather than \
@@ -102,6 +104,8 @@ def build_stories(posts: list[Post], topics: list[dict]) -> list[Story]:
                 id=f"story-{i}",
                 title=topic.get("title", ""),
                 summary=topic.get("summary", ""),
+                title_en=topic.get("title_en", ""),
+                summary_en=topic.get("summary_en", ""),
                 tags=tags,
                 sources=sources,
                 engagement=sum(p.engagement for p in topic_posts),

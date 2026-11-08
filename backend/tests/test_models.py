@@ -41,11 +41,35 @@ def test_post_requires_text() -> None:
         Post(post_id="1", source_id="s", source_name="S", source_tier="tabloid", url="u", text="")
 
 
+def test_story_en_fields_default_empty() -> None:
+    """Old digests (schema before en fields) must still parse."""
+    story = Story(
+        id="story-1",
+        title="ခေါင်းစဉ်",
+        summary="အနှစ်ချုပ်",
+        sources=[
+            StorySource(
+                source_id="s1",
+                source_name="S",
+                source_tier="tabloid",
+                post_url="https://facebook.com/1",
+            )
+        ],
+        engagement=10,
+        first_seen="2026-11-08T10:00:00+06:30",
+        last_updated="2026-11-08T10:00:00+06:30",
+    )
+    assert story.title_en == ""
+    assert story.summary_en == ""
+
+
 def test_digest_round_trip() -> None:
     story = Story(
         id="story-1",
         title="ခေါင်းစဉ်",
         summary="အနှစ်ချုပ်",
+        title_en="Headline",
+        summary_en="Summary",
         tags=["tea"],
         sources=[
             StorySource(

@@ -49,6 +49,9 @@ class Story(BaseModel):
     id: str
     title: str
     summary: str
+    # English rendering of the same story; empty when the LLM omitted it.
+    title_en: str = ""
+    summary_en: str = ""
     tags: list[str] = []
     sources: list[StorySource]
     engagement: int
