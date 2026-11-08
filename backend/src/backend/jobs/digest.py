@@ -153,7 +153,7 @@ def main() -> None:
     def run() -> dict[str, int]:
         posts = PostRepo(DB_FILE).get_posts_for_day(day)
         if not posts:
-            raise SystemExit(f"No posts for {day} in {DB_FILE}. Run the fetch job first.")
+            raise RuntimeError(f"No posts for {day} in {DB_FILE}. Run the fetch job first.")
         print(f"{len(posts)} posts for {day} -> clustering via {settings.llm_model}")
 
         topics = call_llm(posts)

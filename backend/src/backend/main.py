@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from pydantic import BaseModel
 
@@ -135,3 +136,10 @@ def chat(req: ChatRequest) -> ChatResponse:
         kb_sources |= {src.source_name for s in archived.stories for src in s.sources}
     sources = sorted({name for name in kb_sources if name in answer})
     return ChatResponse(answer=answer, sources=sources)
+
+
+# Serve the built frontend (frontend/dist) from the same port as the API.
+# Mounted last so /api routes win; absent in local dev where Vite serves the app.
+DIST_DIR = Path(__file__).parents[3] / "frontend" / "dist"
+if DIST_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=DIST_DIR, html=True), name="frontend")

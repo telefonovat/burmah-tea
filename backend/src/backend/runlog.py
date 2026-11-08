@@ -36,9 +36,10 @@ def append_log(line: RunLogLine, path: Path = RUN_LOG) -> None:
 
 
 def run_logged(
-    job: str, day: str, fn: Callable[[], dict[str, int]], path: Path = RUN_LOG
+    job: str, day: str, fn: Callable[[], dict[str, int]], path: Path | None = None
 ) -> None:
     """Run fn, append one log line, re-raise on failure so the process exits non-zero."""
+    log = path or RUN_LOG
     started_at = now_mmt_iso()
     t0 = time.monotonic()
     try:
@@ -54,7 +55,7 @@ def run_logged(
                 day=day,
                 error=f"{type(e).__name__}: {e}",
             ),
-            path,
+            log,
         )
         raise
     append_log(
@@ -67,5 +68,5 @@ def run_logged(
             day=day,
             counts=counts,
         ),
-        path,
+        log,
     )
