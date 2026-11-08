@@ -1,24 +1,34 @@
-import type { Story } from "../types";
+import { TAG_LABEL, TIER_LABEL } from "../strings";
+import type { Lang, Story } from "../types";
 
-export default function StoryCard({ story }: { story: Story }) {
-  const confirmed = story.tag === "[confirmed]";
+export default function StoryCard({ story, lang }: { story: Story; lang: Lang }) {
+  // English text falls back to Burmese when the digest lacks the en fields.
+  const title = (lang === "en" && story.title_en) || story.title;
+  const summary = (lang === "en" && story.summary_en) || story.summary;
+
   return (
-    <article id={`story-${story.title}`} className="story-card">
-      <div className="story-header">
-        <h2>
-          <a href={story.url}>{story.title}</a>
-        </h2>
-        <span className={`badge ${confirmed ? "badge-confirmed" : "badge-reported"}`}>
-          {story.tag}
-        </span>
+    <article className="story-card">
+      <div className="story-tags">
+        {story.tags.map((t) => (
+          <span key={t} className={`chip chip-${t}`}>
+            {TAG_LABEL[t]?.[lang] ?? t}
+          </span>
+        ))}
       </div>
-      <p className="engagement">
-        <span className="engagement-count">❤️ {story.engagement}</span>
-      </p>
-      <div className="summary">{story.summary}</div>
-      <p className="source">
-        <span>Source:</span> <a href={story.page_url}>{story.page_name}</a>
-      </p>
+      <h3 className="story-title">{title}</h3>
+      <p className="story-summary">{summary}</p>
+      <ul className="story-sources">
+        {story.sources.map((src) => (
+          <li key={src.source_id}>
+            <a href={src.post_url} target="_blank" rel="noreferrer">
+              {src.source_name}
+            </a>
+            <span className={`tier tier-${src.source_tier}`}>
+              {TIER_LABEL[src.source_tier]?.[lang] ?? src.source_tier}
+            </span>
+          </li>
+        ))}
+      </ul>
     </article>
   );
 }
