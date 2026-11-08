@@ -3,14 +3,15 @@
 import json
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Absolute so the env file loads no matter where uvicorn is started from.
 ENV_FILE = Path(__file__).parents[2] / ".env"
-DATA_FILE = Path(__file__).parents[3] / "frontend" / "src" / "data" / "digest.today.json"
+# Single source of truth for pipeline output. Pipeline writes, backend serves, frontend fetches.
+DATA_DIR = Path(__file__).parents[3] / "data"
 
 
 class Settings(BaseSettings):
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
     llm_model: str = "gemini-3.8-flash"
+    apify_token: str = ""
 
 
 settings = Settings()
@@ -41,8 +43,14 @@ class ChatResponse(BaseModel):
     sources: list[str]
 
 
+# Scraped posts from the pipeline (scraper.py output). Chat answers from these.
+KB_FILE = DATA_DIR / "digest.today.test.json"
+# Cap each post's text so a few long posts can't crowd out the rest of the KB.
+MAX_POST_CHARS = 3000
+
 SYSTEM_PROMPT = """You are a Burmese news digest assistant. Answer only from the posts below.
 Cite the source page name for every claim. If the posts do not answer the question, say so — do not guess.
+Be brief and succint.
 Answer in the language the user writes in.
 
 Posts:
@@ -54,11 +62,22 @@ def health() -> dict:
     return {"status": "ok", "model": settings.llm_model}
 
 
+@app.get("/api/digest/{view}")
+def digest(view: str) -> list[dict]:
+    """Serve digest data. Pipeline writes data/, this is the single serving point."""
+    if view not in ("today", "yesterday"):
+        raise HTTPException(status_code=404, detail="view must be today or yesterday")
+    path = DATA_DIR / f"digest.{view}.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"no digest for {view}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
-    posts = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    posts = json.loads(KB_FILE.read_text(encoding="utf-8"))
     posts_text = "\n\n".join(
-        f"Title: {p['title']}\nSummary: {p['summary']}\nSource: {p['page_name']}"
+        f"Text: {p['text'][:MAX_POST_CHARS]}\nSource: {p['page_name']}"
         for p in posts
     )
     system = SYSTEM_PROMPT.format(posts=posts_text)

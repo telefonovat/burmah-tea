@@ -1,0 +1,7 @@
+# Facebook pages to scrape, one url per entry.
+urls = [
+    "https://www.facebook.com/BBCnewsBurmese",
+    "https://www.facebook.com/myanmarnownews",
+    "https://www.facebook.com/theirrawaddyburmese",
+    "https://www.facebook.com/MyanmarCelebrity",
+]

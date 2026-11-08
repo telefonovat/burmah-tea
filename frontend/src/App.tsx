@@ -1,15 +1,8 @@
-import { useState } from "react";
-import todayData from "./data/digest.today.json";
-import yesterdayData from "./data/digest.yesterday.json";
+import { useEffect, useState } from "react";
 import type { Story, View } from "./types";
 import StoryCard from "./components/StoryCard";
 import ViewSwitcher from "./components/ViewSwitcher";
 import SiteHeader from "./components/SiteHeader";
-
-const digests: Record<View, Story[]> = {
-  today: todayData as Story[],
-  yesterday: yesterdayData as Story[],
-};
 
 function dateLabel(view: View): string {
   const d = new Date();
@@ -19,6 +12,31 @@ function dateLabel(view: View): string {
 
 export default function App() {
   const [view, setView] = useState<View>("today");
+  const [digests, setDigests] = useState<Partial<Record<View, Story[]>>>({});
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load(view: View) {
+      setError(false);
+      try {
+        const res = await fetch(`/api/digest/${view}`);
+        if (!res.ok) throw new Error(String(res.status));
+        const data: Story[] = await res.json();
+        if (!cancelled) setDigests((d) => ({ ...d, [view]: data }));
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    }
+
+    if (!digests[view]) load(view);
+    return () => {
+      cancelled = true;
+    };
+  }, [view, digests]);
+
+  const stories = digests[view] ?? [];
 
   return (
     <>
@@ -31,7 +49,9 @@ export default function App() {
           <p className="meta">
             <span className="date">{dateLabel(view)}</span>
           </p>
-          {digests[view].map((story) => (
+          {error && <p className="chat-hint">ဒေတာ မရရှိပါ။ Backend လည်ပတ်နေပါသလား?</p>}
+          {!error && stories.length === 0 && <p className="chat-hint">…</p>}
+          {stories.map((story) => (
             <StoryCard key={story.url} story={story} />
           ))}
         </main>
