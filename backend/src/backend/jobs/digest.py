@@ -10,6 +10,7 @@ Run: uv run --project backend python -m backend.jobs.digest
 import json
 import re
 from datetime import date
+from math import ceil
 
 from openai import OpenAI
 
@@ -111,6 +112,29 @@ def build_stories(posts: list[Post], topics: list[dict]) -> list[Story]:
     return stories
 
 
+_TAG_ORDER = {"confirmed": 0, "popular": 1, "tea": 2}
+
+
+def apply_tags(stories: list[Story], fraction: float) -> None:
+    """Mechanical tags, in place. The LLM decides what a story is;
+    arithmetic decides how true or popular it is.
+
+    - confirmed: posts from at least 2 distinct trustworthy-tier sources.
+    - popular: engagement in the top `fraction` of today's story distribution.
+    """
+    for story in stories:
+        trustworthy = {s.source_id for s in story.sources if s.source_tier == "trustworthy"}
+        if len(trustworthy) >= 2:
+            story.tags.append("confirmed")
+    if stories:
+        # epsilon kills float noise: 30 * 0.1 == 3.0000000000000004
+        k = max(1, ceil(len(stories) * fraction - 1e-9))
+        for story in sorted(stories, key=lambda s: s.engagement, reverse=True)[:k]:
+            story.tags.append("popular")
+    for story in stories:
+        story.tags = sorted(set(story.tags), key=lambda t: _TAG_ORDER[t])
+
+
 def main() -> None:
     import argparse
 
@@ -135,6 +159,7 @@ def main() -> None:
                 f"LLM returned {len(topics)} topics but none matched a known post id"
             )
         print(f"{len(stories)} stories")
+        apply_tags(stories, settings.popular_top_fraction)
 
         digest = Digest(
             date=day.isoformat(),
@@ -146,7 +171,14 @@ def main() -> None:
             digest.model_dump_json(indent=2) + "\n", encoding="utf-8"
         )
         print(f"Wrote {OUTPUT_FILE}")
-        return {"posts": len(posts), "topics": len(topics), "stories": len(stories)}
+        return {
+            "posts": len(posts),
+            "topics": len(topics),
+            "stories": len(stories),
+            "confirmed": sum("confirmed" in s.tags for s in stories),
+            "popular": sum("popular" in s.tags for s in stories),
+            "tea": sum("tea" in s.tags for s in stories),
+        }
 
     run_logged("digest", day.isoformat(), run)
 
